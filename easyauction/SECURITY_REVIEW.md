@@ -7,7 +7,7 @@ This is a manual read-through; nothing was compiled or run (see README).
 
 ## Ranked findings
 
-### 1. Settlement is gated to one address (High – liveness / fund lock)
+### 1. Settlement is gated to one address (High – liveness / fund lock) — FIXED in this PR
 `settleAuction` and `settleAuctionAtomically` require `msg.sender == subjectFactory`.
 Bidders' funds, and the auctioneer's tokens, only move after settlement
 (`claimFromParticipantOrder` needs `clearingPriceOrder != 0`). If the factory
@@ -15,8 +15,8 @@ is buggy, lacks a call path to `settleAuction`, is paused, or the owner points
 `subjectFactory` at a bad address, every running auction is stuck with funds
 locked. The original contract lets anyone settle, which is safe because the
 result is deterministic.
-**Fix:** let anyone call `settleAuction` after the end date; keep factory-only
-only for `settleAuctionAtomically` if that is truly needed.
+**Fix (applied):** `settleAuction` is now permissionless after the end date;
+`settleAuctionAtomically` and `initiateAuction` stay factory-only.
 
 ### 2. Owner can swap `subjectFactory` at any time (Medium – centralization)
 `setSubjectFactory` has no timelock, no zero-address check and no event. Changing
@@ -47,10 +47,8 @@ Tokens are pulled from `msg.sender`, while the order is credited to
 can create orders in someone else's name, and the allow-list check is applied to
 `orderSubmitter`, not the payer. Confirm this is intended.
 
-### 7. Dead code in `settleAuction` auth (Informational)
-`|| msg.sender == address(this)` is never true: `settleAuctionAtomically` calls
-`settleAuction` as an internal call, so `msg.sender` is still the factory.
-Harmless, but misleading.
+### 7. Dead code in `settleAuction` auth (Informational) — resolved
+The whole caller check was removed together with fix #1.
 
 ### 8. `registerUser` is public (Informational)
 Anyone can register any address and consume user ids. `numUsers` is `uint64`, so

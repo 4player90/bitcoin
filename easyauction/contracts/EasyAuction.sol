@@ -463,16 +463,14 @@ contract EasyAuction is Ownable {
         settleAuction(auctionId);
     }
 
-    // @dev function settling the auction and calculating the price
+    // @dev function settling the auction and calculating the price.
+    // Permissionless: the result is deterministic, so anyone may settle once
+    // the auction has ended (prevents funds being locked if the factory is unavailable).
     function settleAuction(uint256 auctionId)
         public
         atStageSolutionSubmission(auctionId)
         returns (bytes32 clearingOrder)
     {
-        require(
-            subjectFactory == msg.sender || msg.sender == address(this),
-            "Caller is not the subject factory address"
-        );
         (
             uint64 auctioneerId,
             uint96 minAuctionedBuyAmount,

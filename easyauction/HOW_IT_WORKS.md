@@ -24,7 +24,7 @@ pays the same price.
 4. **Solution submission** after the end date. Anyone may call
    `precalculateSellAmountSum` to sum orders from the best price downwards in
    chunks (so big order books can be processed over several transactions).
-   `settleAuction` (factory only in this version) finishes the sum, finds where
+   `settleAuction` (open to anyone) finishes the sum, finds where
    supply meets demand and stores the **clearing order**.
 5. **Claim** (`claimFromParticipantOrder`). Each order is compared with the
    clearing order:
@@ -52,6 +52,7 @@ bids cover the full auctioned amount at that order's price.
 initiation, paid to `feeReceiverUserId` only for the portion actually sold.
 
 ## What this version changes vs. the original Gnosis contract
-- `initiateAuction`, `settleAuction`, `settleAuctionAtomically` are restricted to
-  `subjectFactory`, which the owner sets.
+- `initiateAuction` and `settleAuctionAtomically` are restricted to
+  `subjectFactory`, which the owner sets. `settleAuction` is open to anyone, as in
+  the original, so funds cannot be locked by an unavailable factory.
 - Everything else (orders, claims, fees) follows the original design.

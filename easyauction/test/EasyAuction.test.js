@@ -75,11 +75,23 @@ describe("EasyAuction", () => {
       ).to.be.revertedWith("Caller is not the subject factory address");
     });
 
-    it("only the factory can settle", async () => {
+    it("anyone can settle after the auction ends, not before", async () => {
+      await initiate();
+      await expect(auction.connect(other).settleAuction(1)).to.be.revertedWith(
+        "Auction not in solution submission phase"
+      );
+      await increaseTime(2 * DAY + 1);
+      await auction.connect(other).settleAuction(1);
+      expect((await auction.auctionData(1)).clearingPriceOrder).to.not.equal(
+        ethers.constants.HashZero
+      );
+    });
+
+    it("only the factory can settle atomically", async () => {
       await initiate();
       await increaseTime(2 * DAY + 1);
       await expect(
-        auction.connect(other).settleAuction(1)
+        auction.connect(other).settleAuctionAtomically(1, [1000], [2000], [QUEUE_START], "0x")
       ).to.be.revertedWith("Caller is not the subject factory address");
     });
 

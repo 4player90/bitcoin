@@ -2,7 +2,8 @@
 
 - `contracts/EasyAuction.sol` – the pasted contract with the two compile issues
   fixed (`pragma` typo; truncated tail completed with `containsOrder`'s body and
-  the closing brace). No behaviour was changed. The `containsOrder` body
+  the closing brace), plus one deliberate change: `settleAuction` is now
+  permissionless after the auction ends (review finding #1). The `containsOrder` body
   (`return sellOrders[auctionId].contains(order);`) is reconstructed from the
   original Gnosis contract – please compare with your source.
 - `SECURITY_REVIEW.md` – ranked findings.
